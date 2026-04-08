@@ -1,0 +1,21 @@
+{
+  "name": "ml-pbl",
+  "version": "1.0.0",
+  "description": "Interactive, modular project demonstrating reinforcement learning inspired methods for Quantum Optimal Control (QOC).",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Gaganharikiranmarella/ml-pbl.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Gaganharikiranmarella/ml-pbl/issues"
+  },
+  "homepage": "https://github.com/Gaganharikiranmarella/ml-pbl#readme"
+}

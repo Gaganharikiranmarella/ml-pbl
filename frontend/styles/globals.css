@@ -1,0 +1,51 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-main: #f6f8ff;
+  --bg-surface: rgba(255, 255, 255, 0.68);
+  --text-main: #101432;
+  --blob-a: #ffd166;
+  --blob-b: #2fb9b2;
+  --blob-c: #ff7b54;
+}
+
+.dark {
+  --bg-main: #090b12;
+  --bg-surface: rgba(15, 20, 34, 0.6);
+  --text-main: #f2f5ff;
+  --blob-a: #243b7a;
+  --blob-b: #2fb9b2;
+  --blob-c: #ff7b54;
+}
+
+html,
+body,
+#__next {
+  padding: 0;
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: "Space Grotesk", sans-serif;
+  color: var(--text-main);
+  background:
+    radial-gradient(circle at 15% 15%, color-mix(in srgb, var(--blob-a) 40%, transparent) 0, transparent 45%),
+    radial-gradient(circle at 85% 20%, color-mix(in srgb, var(--blob-b) 40%, transparent) 0, transparent 40%),
+    radial-gradient(circle at 50% 85%, color-mix(in srgb, var(--blob-c) 35%, transparent) 0, transparent 45%),
+    linear-gradient(135deg, var(--bg-main), color-mix(in srgb, var(--bg-main) 80%, #1b2448));
+  background-attachment: fixed;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+code,
+pre {
+  font-family: "IBM Plex Mono", monospace;
+}
