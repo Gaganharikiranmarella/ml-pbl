@@ -65,7 +65,6 @@ export default function HomePage() {
             transition={{ duration: 0.55, ease: "easeOut" }}
             className="rounded-3xl border border-slate-300/40 bg-white/65 p-6 shadow-halo backdrop-blur dark:border-slate-200/10 dark:bg-slate-900/40 md:p-10"
           >
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-lagoon">Section 1</p>
             <h1 className="mt-3 text-3xl font-bold leading-tight md:text-5xl">
               Reinforcement Learning in Quantum Optimal Control
             </h1>
@@ -84,13 +83,7 @@ export default function HomePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, delay: 0.2, ease: "easeOut" }}
           >
-            <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-lagoon">
-              Section 2
-            </p>
-            <h2 className="text-3xl font-bold leading-tight md:text-5xl">
-              Reinforcement Learning Methods for Quantum Optimal Control
-            </h2>
-            <p className="mt-4 max-w-2xl text-sm text-slate-700 dark:text-slate-300 md:text-base">
+            <p className="max-w-2xl text-sm text-slate-700 dark:text-slate-300 md:text-base">
               Explore GRAPE, Krotov, Pontryagin, and Shortcuts to Adiabaticity with interactive
               complexity plots, concise theory, and implementation snippets.
             </p>
