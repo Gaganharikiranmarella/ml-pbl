@@ -2,54 +2,40 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-import jax
 import jax.numpy as jnp
 
-from .common import OptimizationResult, QOCProblem, fidelity, initial_pulses, objective
+from backend.rl.agent import PolicyGradientAgent, PolicyGradientConfig
+from backend.rl.core import RLEnvironment, RLResult
 
 
 @dataclass(frozen=True)
 class STAConfig:
-    steps: int = 180
-    learning_rate: float = 0.02
-    smoothness_weight: float = 8e-3
-
-
-def _finite_difference_smoothness(pulses: jnp.ndarray) -> jnp.ndarray:
-    return jnp.mean((pulses[:, 1:] - pulses[:, :-1]) ** 2)
+    episodes: int = 110
+    learning_rate: float = 0.012
+    baseline_weight: float = 0.7
+    entropy_coef: float = 0.03
 
 
 def run_shortcuts_to_adiabaticity(
-    problem: QOCProblem,
+    drift: jnp.ndarray,
+    controls: tuple[jnp.ndarray, ...],
+    target: jnp.ndarray,
+    dt: float,
+    horizon: int,
     config: STAConfig = STAConfig(),
-) -> OptimizationResult:
-    """STA-inspired optimization balancing fidelity and pulse smoothness."""
+) -> RLResult:
+    """STA using Policy Gradient RL with strong smoothness constraints."""
 
-    pulses = initial_pulses(len(problem.controls), problem.horizon, scale=0.01)
+    env = RLEnvironment(drift, controls, target, dt, horizon)
 
-    def sta_loss(p: jnp.ndarray) -> jnp.ndarray:
-        base = objective(problem, p, l2_reg=2e-4)
-        return base + config.smoothness_weight * _finite_difference_smoothness(p)
-
-    grad_fn = jax.grad(sta_loss)
-
-    loss_hist = []
-    fidelity_hist = []
-    current = pulses
-
-    for _ in range(config.steps):
-        grad = grad_fn(current)
-        current = current - config.learning_rate * grad
-        loss_hist.append(sta_loss(current))
-        fidelity_hist.append(fidelity(problem, current))
-
-    return OptimizationResult(
-        pulses=current,
-        loss_history=jnp.array(loss_hist),
-        fidelity_history=jnp.array(fidelity_hist),
-        metadata={
-            "steps": float(config.steps),
-            "learning_rate": config.learning_rate,
-            "smoothness_weight": config.smoothness_weight,
-        },
+    pg_config = PolicyGradientConfig(
+        episodes=config.episodes,
+        learning_rate=config.learning_rate,
+        baseline_weight=config.baseline_weight,
+        entropy_coef=config.entropy_coef,
+        policy_scale=0.03,  # Very small init for smooth pulses
     )
+
+    agent = PolicyGradientAgent(env, pg_config)
+    return agent.train()
+

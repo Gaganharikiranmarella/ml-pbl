@@ -2,41 +2,47 @@ from __future__ import annotations
 
 import jax.numpy as jnp
 
-from .common import (
-    OptimizationResult,
-    QOCProblem,
-    initial_pulses,
-    optimize_with_gradient_descent,
-)
+from backend.rl.agent import PolicyGradientAgent, PolicyGradientConfig
+from backend.rl.core import RLEnvironment, RLResult
 
 
 def run_grape(
-    problem: QOCProblem,
-    steps: int = 250,
-    learning_rate: float = 3e-2,
-    l2_reg: float = 1e-4,
-) -> OptimizationResult:
-    """GRAPE: gradient ascent over piecewise-constant control amplitudes."""
+    drift: jnp.ndarray,
+    controls: tuple[jnp.ndarray, ...],
+    target: jnp.ndarray,
+    dt: float,
+    horizon: int,
+    episodes: int = 150,
+    learning_rate: float = 0.02,
+) -> RLResult:
+    """GRAPE using Policy Gradient RL with direct amplitude learning."""
 
-    pulses = initial_pulses(len(problem.controls), problem.horizon, scale=0.05)
-    result = optimize_with_gradient_descent(
-        problem=problem,
-        pulses=pulses,
-        steps=steps,
+    env = RLEnvironment(drift, controls, target, dt, horizon)
+
+    config = PolicyGradientConfig(
+        episodes=episodes,
         learning_rate=learning_rate,
-        l2_reg=l2_reg,
+        baseline_weight=0.5,
+        entropy_coef=0.005,
+        policy_scale=0.08,
     )
-    return result
+
+    agent = PolicyGradientAgent(env, config)
+    return agent.train()
 
 
-def sample_problem() -> QOCProblem:
+def sample_problem() -> tuple[jnp.ndarray, jnp.ndarray, jnp.ndarray, float, int]:
+    """Sample 2-qubit Hadamard problem for testing."""
     sx = jnp.array([[0, 1], [1, 0]], dtype=jnp.complex64)
     sz = jnp.array([[1, 0], [0, -1]], dtype=jnp.complex64)
-    hadamard = (1 / jnp.sqrt(2)) * jnp.array([[1, 1], [1, -1]], dtype=jnp.complex64)
-    return QOCProblem(
-        drift=0.2 * sz,
-        controls=(sx, sz),
-        target=hadamard,
-        dt=0.05,
-        horizon=80,
+    hadamard = (1 / jnp.sqrt(2)) * jnp.array(
+        [[1, 1], [1, -1]], dtype=jnp.complex64
     )
+    return (
+        0.2 * sz,
+        (sx, sz),
+        hadamard,
+        0.05,
+        80,
+    )
+

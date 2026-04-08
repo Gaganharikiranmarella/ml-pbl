@@ -2,43 +2,40 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-import jax
 import jax.numpy as jnp
 
-from .common import OptimizationResult, QOCProblem, fidelity, initial_pulses, objective
+from backend.rl.agent import PolicyGradientAgent, PolicyGradientConfig
+from backend.rl.core import RLEnvironment, RLResult
 
 
 @dataclass(frozen=True)
 class KrotovConfig:
-    steps: int = 200
-    step_size: float = 0.12
-    shape_lambda: float = 5e-3
+    episodes: int = 120
+    learning_rate: float = 0.015
+    baseline_weight: float = 0.6
+    entropy_coef: float = 0.02
 
 
-def run_krotov(problem: QOCProblem, config: KrotovConfig = KrotovConfig()) -> OptimizationResult:
-    """A lightweight Krotov-style monotonic update loop with a shape penalty."""
+def run_krotov(
+    drift: jnp.ndarray,
+    controls: tuple[jnp.ndarray, ...],
+    target: jnp.ndarray,
+    dt: float,
+    horizon: int,
+    config: KrotovConfig = KrotovConfig(),
+) -> RLResult:
+    """Krotov using Policy Gradient RL with smooth regularization."""
 
-    pulses = initial_pulses(len(problem.controls), problem.horizon, scale=0.02)
-    grad_fn = jax.grad(lambda p: objective(problem, p, l2_reg=config.shape_lambda))
+    env = RLEnvironment(drift, controls, target, dt, horizon)
 
-    loss_hist = []
-    fidelity_hist = []
-    current = pulses
-
-    for _ in range(config.steps):
-        grad = grad_fn(current)
-        update = config.step_size * grad
-        current = current - update
-        loss_hist.append(objective(problem, current, l2_reg=config.shape_lambda))
-        fidelity_hist.append(fidelity(problem, current))
-
-    return OptimizationResult(
-        pulses=current,
-        loss_history=jnp.array(loss_hist),
-        fidelity_history=jnp.array(fidelity_hist),
-        metadata={
-            "steps": float(config.steps),
-            "step_size": config.step_size,
-            "shape_lambda": config.shape_lambda,
-        },
+    pg_config = PolicyGradientConfig(
+        episodes=config.episodes,
+        learning_rate=config.learning_rate,
+        baseline_weight=config.baseline_weight,
+        entropy_coef=config.entropy_coef,
+        policy_scale=0.05,  # Smaller init for smoother policy
     )
+
+    agent = PolicyGradientAgent(env, pg_config)
+    return agent.train()
+

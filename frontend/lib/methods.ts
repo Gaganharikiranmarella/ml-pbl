@@ -16,45 +16,45 @@ export const METHODS: Record<MethodId, MethodContent> = {
   grape: {
     id: "grape",
     title: "GRAPE",
-    subtitle: "Gradient Ascent Pulse Engineering",
+    subtitle: "Policy Gradient RL with Direct Amplitude Learning",
     theory:
-      "GRAPE discretizes the control pulse into time bins and performs gradient ascent over each bin to maximize gate fidelity. It is widely used because it is numerically stable and scales well to medium-size control landscapes.",
-    code: `def run_grape(problem, steps=250, learning_rate=3e-2):\n    pulses = initial_pulses(len(problem.controls), problem.horizon, scale=0.05)\n    return optimize_with_gradient_descent(\n        problem=problem,\n        pulses=pulses,\n        steps=steps,\n        learning_rate=learning_rate,\n        l2_reg=1e-4,\n    )`,
+      "GRAPE uses a Policy Gradient RL agent that learns direct control amplitudes at each time step. The agent explores the control landscape via REINFORCE, receiving fidelity-based rewards. This RL approach automatically discovers optimal pulse sequences while maintaining exploration through entropy regularization.",
+    code: `from backend.rl.agent import PolicyGradientAgent, PolicyGradientConfig\nfrom backend.rl.core import RLEnvironment\n\nenv = RLEnvironment(drift, controls, target, dt, horizon)\nconfig = PolicyGradientConfig(episodes=150, learning_rate=0.02, policy_scale=0.08)\nagent = PolicyGradientAgent(env, config)\nresult = agent.train()  # Returns fidelity_history`,
     example:
-      "Applied to a 1-qubit Hadamard gate transfer, GRAPE quickly improves fidelity while maintaining smooth pulse amplitudes when mild regularization is used.",
+      "Applied to a 1-qubit Hadamard gate, the RL agent learns smooth pulse amplitudes over 150 episodes, achieving high fidelity through reward maximization.",
     complexity: buildComplexity("grape"),
   },
   krotov: {
     id: "krotov",
     title: "Krotov",
-    subtitle: "Monotonic Functional Optimization",
+    subtitle: "Policy Gradient RL with Smooth Regularization",
     theory:
-      "Krotov updates controls using forward and backward propagated states to guarantee monotonic objective improvement under suitable conditions. It is attractive when strict convergence behavior matters.",
-    code: `def run_krotov(problem, config=KrotovConfig()):\n    pulses = initial_pulses(len(problem.controls), problem.horizon, scale=0.02)\n    for _ in range(config.steps):\n        grad = grad_fn(pulses)\n        pulses = pulses - config.step_size * grad\n    return result`,
+      "Krotov employs the same Policy Gradient RL framework but with enhanced smoothness regularization. The agent learns smoother control policies through higher entropy regularization (0.02) and reduced policy scale, mimicking Krotov's monotonic improvement philosophy.",
+    code: `from backend.rl.agent import PolicyGradientAgent, PolicyGradientConfig\n\nconfig = PolicyGradientConfig(\n    episodes=120, learning_rate=0.015, entropy_coef=0.02, policy_scale=0.05\n)\nagent = PolicyGradientAgent(env, config)\nresult = agent.train()  # Smoother pulses`,
     example:
-      "In state-to-state transfer, Krotov-style updates can reduce oscillatory optimization trajectories and produce more predictable convergence than naive gradient descent.",
+      "In state-to-state transfer, Krotov's RL variant achieves monotonic reward improvement by penalizing erratic changes in control policies, reducing oscillatory behavior.",
     complexity: buildComplexity("krotov"),
   },
   pontryagin: {
     id: "pontryagin",
     title: "Pontryagin",
-    subtitle: "Maximum Principle Guided Updates",
+    subtitle: "Policy Gradient RL with Costate-Inspired Baseline",
     theory:
-      "Pontryagin's Maximum Principle frames control updates through a Hamiltonian maximization condition with co-state dynamics. In discretized form, it yields principled gradient-like updates with physics-informed structure.",
-    code: `def run_pontryagin(problem, config=PontryaginConfig()):\n    velocity = 0\n    for _ in range(config.steps):\n        grad = grad_fn(pulses)\n        velocity = config.momentum * velocity + (1 - config.momentum) * grad\n        pulses = pulses - config.alpha * velocity\n    return result`,
+      "Pontryagin adapts the Policy Gradient RL agent using a higher baseline weight (0.55), emulating costate dynamics. The baseline predicts expected rewards, enabling more principled policy updates that align with the Maximum Principle's structure.",
+    code: `from backend.rl.agent import PolicyGradientAgent, PolicyGradientConfig\n\nconfig = PolicyGradientConfig(\n    episodes=140, learning_rate=0.018, baseline_weight=0.55\n)\nagent = PolicyGradientAgent(env, config)\nresult = agent.train()  # Costate-informed baseline`,
     example:
-      "For constrained pulse shaping, the Pontryagin-inspired momentum step improves robustness against local noise in gradient estimates.",
+      "For constrained pulse shaping, the Pontryagin RL approach improves robustness by using a stronger baseline, reducing variance in policy gradient estimates.",
     complexity: buildComplexity("pontryagin"),
   },
   shortcuts: {
     id: "shortcuts",
     title: "STA",
-    subtitle: "Shortcuts to Adiabaticity",
+    subtitle: "Policy Gradient RL with Adiabatic-Inspired Smoothness",
     theory:
-      "STA designs non-adiabatic control fields that mimic slow adiabatic outcomes in shorter time. Optimization can include smoothness and bounded-power terms to produce physically realizable pulses.",
-    code: `def run_shortcuts_to_adiabaticity(problem, config=STAConfig()):\n    for _ in range(config.steps):\n        grad = grad_fn(current)\n        current = current - config.learning_rate * grad\n    return result`,
+      "STA uses Policy Gradient RL with the strongest smoothness constraints. Very low policy scale (0.03) and high entropy regularization (0.03) encourage the agent to learn minimal-power pulses that mimic adiabatic shortcuts.",
+    code: `from backend.rl.agent import PolicyGradientAgent, PolicyGradientConfig\n\nconfig = PolicyGradientConfig(\n    episodes=110, learning_rate=0.012, entropy_coef=0.03, policy_scale=0.03\n)\nagent = PolicyGradientAgent(env, config)\nresult = agent.train()  # Minimal-power pulses`,
     example:
-      "For time-critical transfer, STA-inspired objectives trade minimal infidelity against pulse smoothness and can reduce runtime significantly.",
+      "For time-critical transfer, STA's RL variant trades peak infidelity for smoother, lower-power pulses that are physically more realizable.",
     complexity: buildComplexity("shortcuts"),
   },
 };

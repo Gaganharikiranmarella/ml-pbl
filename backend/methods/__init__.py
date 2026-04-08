@@ -1,13 +1,11 @@
-from .common import OptimizationResult, QOCProblem
-from .grape import run_grape
+from .grape import run_grape, sample_problem
 from .krotov import KrotovConfig, run_krotov
 from .pontryagin import PontryaginConfig, run_pontryagin
 from .shortcuts import STAConfig, run_shortcuts_to_adiabaticity
 
 __all__ = [
-    "OptimizationResult",
-    "QOCProblem",
     "run_grape",
+    "sample_problem",
     "KrotovConfig",
     "run_krotov",
     "PontryaginConfig",
@@ -15,3 +13,4 @@ __all__ = [
     "STAConfig",
     "run_shortcuts_to_adiabaticity",
 ]
+
