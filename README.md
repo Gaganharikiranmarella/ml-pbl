@@ -30,15 +30,15 @@ All 4 QOC methods now use **the same Policy Gradient RL agent** with different c
 ```
 backend/
 +-- rl/
-¦   +-- core.py         # RLEnvironment (quantum simulator)
-¦   +-- agent.py        # PolicyGradientAgent (unified RL trainer)
-¦   +-- __init__.py
+ï¿½   +-- core.py         # RLEnvironment (quantum simulator)
+ï¿½   +-- agent.py        # PolicyGradientAgent (unified RL trainer)
+ï¿½   +-- __init__.py
 +-- methods/
-¦   +-- grape.py        # GRAPE using RL (direct learning)
-¦   +-- krotov.py       # Krotov using RL (smooth policies)
-¦   +-- pontryagin.py   # Pontryagin using RL (baseline guidance)
-¦   +-- shortcuts.py    # STA using RL (adiabatic smoothing)
-¦   +-- __init__.py
+ï¿½   +-- grape.py        # GRAPE using RL (direct learning)
+ï¿½   +-- krotov.py       # Krotov using RL (smooth policies)
+ï¿½   +-- pontryagin.py   # Pontryagin using RL (baseline guidance)
+ï¿½   +-- shortcuts.py    # STA using RL (adiabatic smoothing)
+ï¿½   +-- __init__.py
 +-- requirements.txt
 
 frontend/
@@ -61,7 +61,7 @@ npm run dev
 ### Backend (Python)
 ```bash
 # Install dependencies
-pip install -r backend/requirements.txt
+pip install -r requirements.txt
 
 # Run a quick test
 python -c "
