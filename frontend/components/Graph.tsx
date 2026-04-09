@@ -25,6 +25,9 @@ const buildLinePath = (points: Point[]) =>
 export default function Graph({ method }: Props) {
   const [timeScale, setTimeScale] = useState(1);
   const [spaceScale, setSpaceScale] = useState(1);
+  const [showTime, setShowTime] = useState(true);
+  const [showSpace, setShowSpace] = useState(true);
+  const [activeN, setActiveN] = useState<number | null>(null);
 
   const points = useMemo(
     () =>
@@ -52,6 +55,7 @@ export default function Graph({ method }: Props) {
 
   const yTicks = Array.from({ length: 5 }, (_, index) => (yMax / 4) * index);
   const xTicks = x;
+  const activePoint = points.find((point) => point.n === activeN) ?? null;
 
   return (
     <section className="rounded-2xl border border-slate-300/40 bg-white/60 p-4 shadow-halo backdrop-blur dark:border-slate-200/10 dark:bg-slate-900/40">
@@ -79,6 +83,17 @@ export default function Graph({ method }: Props) {
             onChange={(e) => setSpaceScale(Number(e.target.value))}
             className="w-full"
           />
+        </label>
+      </div>
+
+      <div className="mb-3 flex flex-wrap items-center gap-3 text-sm">
+        <label className="inline-flex items-center gap-2 rounded-full border border-slate-300/40 px-3 py-1 dark:border-slate-200/20">
+          <input type="checkbox" checked={showTime} onChange={(e) => setShowTime(e.target.checked)} />
+          <span>Show Time</span>
+        </label>
+        <label className="inline-flex items-center gap-2 rounded-full border border-slate-300/40 px-3 py-1 dark:border-slate-200/20">
+          <input type="checkbox" checked={showSpace} onChange={(e) => setShowSpace(e.target.checked)} />
+          <span>Show Space</span>
         </label>
       </div>
 
@@ -111,16 +126,40 @@ export default function Graph({ method }: Props) {
           <line x1={padding.left} x2={width - padding.right} y1={height - padding.bottom} y2={height - padding.bottom} stroke="rgba(255,255,255,0.45)" />
           <line x1={padding.left} x2={padding.left} y1={padding.top} y2={height - padding.bottom} stroke="rgba(255,255,255,0.45)" />
 
-          <path d={buildLinePath(timePoints)} fill="none" stroke="#ff7b54" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-          <path d={buildLinePath(spacePoints)} fill="none" stroke="#2fb9b2" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+          {showTime ? (
+            <path d={buildLinePath(timePoints)} fill="none" stroke="#ff7b54" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+          ) : null}
+          {showSpace ? (
+            <path d={buildLinePath(spacePoints)} fill="none" stroke="#2fb9b2" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+          ) : null}
 
-          {timePoints.map((point, index) => (
-            <circle key={`time-${x[index]}`} cx={point.x} cy={point.y} r="4" fill="#ff7b54" />
-          ))}
+          {showTime
+            ? timePoints.map((point, index) => (
+                <circle
+                  key={`time-${x[index]}`}
+                  cx={point.x}
+                  cy={point.y}
+                  r="4"
+                  fill="#ff7b54"
+                  onMouseEnter={() => setActiveN(x[index])}
+                  onMouseLeave={() => setActiveN(null)}
+                />
+              ))
+            : null}
 
-          {spacePoints.map((point, index) => (
-            <circle key={`space-${x[index]}`} cx={point.x} cy={point.y} r="4" fill="#2fb9b2" />
-          ))}
+          {showSpace
+            ? spacePoints.map((point, index) => (
+                <circle
+                  key={`space-${x[index]}`}
+                  cx={point.x}
+                  cy={point.y}
+                  r="4"
+                  fill="#2fb9b2"
+                  onMouseEnter={() => setActiveN(x[index])}
+                  onMouseLeave={() => setActiveN(null)}
+                />
+              ))
+            : null}
 
           <text x={padding.left} y={18} className="fill-slate-100 text-xs font-semibold">
             Interactive Complexity Graph
@@ -132,6 +171,21 @@ export default function Graph({ method }: Props) {
             <circle cx="18" cy="31" r="5" fill="#2fb9b2" />
             <text x="32" y="35" className="fill-slate-100 text-xs">Space Complexity</text>
           </g>
+
+          {activePoint ? (
+            <g transform={`translate(${padding.left + 8}, ${padding.top + 8})`}>
+              <rect width="200" height="58" rx="10" fill="rgba(15, 23, 42, 0.9)" />
+              <text x="10" y="18" className="fill-slate-100 text-xs">
+                n = {activePoint.n}
+              </text>
+              <text x="10" y="34" className="fill-slate-100 text-xs">
+                Time = {activePoint.time.toFixed(2)}
+              </text>
+              <text x="10" y="50" className="fill-slate-100 text-xs">
+                Space = {activePoint.space.toFixed(2)}
+              </text>
+            </g>
+          ) : null}
         </svg>
       </div>
     </section>

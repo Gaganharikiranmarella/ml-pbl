@@ -2,6 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import Graph from "@/components/Graph";
+import InteractiveExample from "@/components/InteractiveExample";
 import ToggleTheme from "@/components/ToggleTheme";
 import { METHODS, isMethodId } from "@/lib/methods";
 
@@ -62,6 +63,9 @@ export default function MethodPage() {
           <article className="rounded-2xl border border-slate-300/40 bg-white/60 p-6 dark:border-slate-200/10 dark:bg-slate-900/40">
             <h2 className="text-xl font-semibold">Example</h2>
             <p className="mt-2 leading-relaxed text-slate-700 dark:text-slate-300">{method.example}</p>
+            <div className="mt-4">
+              <InteractiveExample method={method} />
+            </div>
           </article>
         </section>
       </div>
