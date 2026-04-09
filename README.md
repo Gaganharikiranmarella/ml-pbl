@@ -125,8 +125,14 @@ git push origin main
 
 Then:
 1. Connect GitHub repo to Vercel
-2. Set **Root Directory** to `frontend`
-3. Deploy
+2. Set **Framework Preset** to **Next.js**
+3. Set **Root Directory** to `frontend`
+4. Keep build settings as default (picked from `frontend/vercel.json`)
+5. Deploy
+
+Notes:
+- The Vercel deployment in this repo is for the frontend app only.
+- The Python backend is configured for Render in `render.yaml`.
 
 ## Frontend Pages
 
