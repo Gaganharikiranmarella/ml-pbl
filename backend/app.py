@@ -1,19 +1,13 @@
-"""Minimal ASGI entrypoint for Vercel Python detection.
+from fastapi import FastAPI
 
-This keeps the backend service build from failing when Vercel scans the repo
-and expects a Python entrypoint at backend/app.py.
-"""
+app = FastAPI(title="QOC RL Backend")
 
 
-async def app(scope, receive, send):
-    if scope["type"] != "http":
-        return
+@app.get("/")
+def root() -> dict[str, str]:
+    return {"message": "QOC backend running"}
 
-    headers = [(b"content-type", b"text/plain; charset=utf-8")]
-    await send({"type": "http.response.start", "status": 200, "headers": headers})
-    await send(
-        {
-            "type": "http.response.body",
-            "body": b"QOC backend placeholder. Frontend lives in frontend/.",
-        }
-    )
+
+@app.get("/health")
+def health() -> dict[str, str]:
+    return {"status": "ok"}
