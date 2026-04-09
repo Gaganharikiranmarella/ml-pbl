@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { MethodContent } from "@/types/method";
 
 interface Props {
@@ -58,7 +59,12 @@ export default function Graph({ method }: Props) {
   const activePoint = points.find((point) => point.n === activeN) ?? null;
 
   return (
-    <section className="rounded-2xl border border-slate-300/40 bg-white/60 p-4 shadow-halo backdrop-blur dark:border-slate-200/10 dark:bg-slate-900/40">
+    <motion.section
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45, ease: "easeOut" }}
+      className="rounded-2xl border border-slate-300/40 bg-white/60 p-4 shadow-halo backdrop-blur dark:border-slate-200/10 dark:bg-slate-900/40"
+    >
       <div className="mb-3 grid gap-3 md:grid-cols-2">
         <label className="text-sm">
           <div className="mb-1 font-medium">Time Weight: {timeScale.toFixed(2)}x</div>
@@ -127,15 +133,37 @@ export default function Graph({ method }: Props) {
           <line x1={padding.left} x2={padding.left} y1={padding.top} y2={height - padding.bottom} stroke="rgba(255,255,255,0.45)" />
 
           {showTime ? (
-            <path d={buildLinePath(timePoints)} fill="none" stroke="#ff7b54" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            <motion.path
+              key={`time-${timeScale}-${showTime}`}
+              d={buildLinePath(timePoints)}
+              fill="none"
+              stroke="#ff7b54"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              initial={{ pathLength: 0, opacity: 0.5 }}
+              animate={{ pathLength: 1, opacity: 1 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+            />
           ) : null}
           {showSpace ? (
-            <path d={buildLinePath(spacePoints)} fill="none" stroke="#2fb9b2" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            <motion.path
+              key={`space-${spaceScale}-${showSpace}`}
+              d={buildLinePath(spacePoints)}
+              fill="none"
+              stroke="#2fb9b2"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              initial={{ pathLength: 0, opacity: 0.5 }}
+              animate={{ pathLength: 1, opacity: 1 }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.05 }}
+            />
           ) : null}
 
           {showTime
             ? timePoints.map((point, index) => (
-                <circle
+                <motion.circle
                   key={`time-${x[index]}`}
                   cx={point.x}
                   cy={point.y}
@@ -143,13 +171,16 @@ export default function Graph({ method }: Props) {
                   fill="#ff7b54"
                   onMouseEnter={() => setActiveN(x[index])}
                   onMouseLeave={() => setActiveN(null)}
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.18, delay: index * 0.02 }}
                 />
               ))
             : null}
 
           {showSpace
             ? spacePoints.map((point, index) => (
-                <circle
+                <motion.circle
                   key={`space-${x[index]}`}
                   cx={point.x}
                   cy={point.y}
@@ -157,6 +188,9 @@ export default function Graph({ method }: Props) {
                   fill="#2fb9b2"
                   onMouseEnter={() => setActiveN(x[index])}
                   onMouseLeave={() => setActiveN(null)}
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.18, delay: index * 0.02 }}
                 />
               ))
             : null}
@@ -172,22 +206,31 @@ export default function Graph({ method }: Props) {
             <text x="32" y="35" className="fill-slate-100 text-xs">Space Complexity</text>
           </g>
 
-          {activePoint ? (
-            <g transform={`translate(${padding.left + 8}, ${padding.top + 8})`}>
-              <rect width="200" height="58" rx="10" fill="rgba(15, 23, 42, 0.9)" />
-              <text x="10" y="18" className="fill-slate-100 text-xs">
-                n = {activePoint.n}
-              </text>
-              <text x="10" y="34" className="fill-slate-100 text-xs">
-                Time = {activePoint.time.toFixed(2)}
-              </text>
-              <text x="10" y="50" className="fill-slate-100 text-xs">
-                Space = {activePoint.space.toFixed(2)}
-              </text>
-            </g>
-          ) : null}
+          <AnimatePresence>
+            {activePoint ? (
+              <motion.g
+                key={`tooltip-${activePoint.n}`}
+                transform={`translate(${padding.left + 8}, ${padding.top + 8})`}
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.16 }}
+              >
+                <rect width="200" height="58" rx="10" fill="rgba(15, 23, 42, 0.9)" />
+                <text x="10" y="18" className="fill-slate-100 text-xs">
+                  n = {activePoint.n}
+                </text>
+                <text x="10" y="34" className="fill-slate-100 text-xs">
+                  Time = {activePoint.time.toFixed(2)}
+                </text>
+                <text x="10" y="50" className="fill-slate-100 text-xs">
+                  Space = {activePoint.space.toFixed(2)}
+                </text>
+              </motion.g>
+            ) : null}
+          </AnimatePresence>
         </svg>
       </div>
-    </section>
+    </motion.section>
   );
 }

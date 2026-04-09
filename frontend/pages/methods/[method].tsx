@@ -1,10 +1,30 @@
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { motion } from "framer-motion";
 import Graph from "@/components/Graph";
 import InteractiveExample from "@/components/InteractiveExample";
 import ToggleTheme from "@/components/ToggleTheme";
 import { METHODS, isMethodId } from "@/lib/methods";
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+    },
+  },
+};
+
+const revealItem = {
+  hidden: { opacity: 0, y: 16 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.35, ease: "easeOut" },
+  },
+};
 
 export default function MethodPage() {
   const router = useRouter();
@@ -30,8 +50,13 @@ export default function MethodPage() {
       <Head>
         <title>{method.title} | QOC RL Lab</title>
       </Head>
-      <div className="mx-auto min-h-screen w-full max-w-6xl px-4 py-8 md:px-10">
-        <header className="mb-8 flex items-start justify-between gap-4">
+      <motion.div
+        className="mx-auto min-h-screen w-full max-w-6xl px-4 py-8 md:px-10"
+        variants={staggerContainer}
+        initial="hidden"
+        animate="show"
+      >
+        <motion.header variants={revealItem} className="mb-8 flex items-start justify-between gap-4">
           <div>
             <Link href="/" className="text-sm text-lagoon underline">
               Back to methods
@@ -40,35 +65,35 @@ export default function MethodPage() {
             <p className="mt-1 text-slate-700 dark:text-slate-300">{method.subtitle}</p>
           </div>
           <ToggleTheme />
-        </header>
+        </motion.header>
 
         <section className="grid gap-5">
-          <article className="rounded-2xl border border-slate-300/40 bg-white/60 p-6 dark:border-slate-200/10 dark:bg-slate-900/40">
+          <motion.article variants={revealItem} className="rounded-2xl border border-slate-300/40 bg-white/60 p-6 dark:border-slate-200/10 dark:bg-slate-900/40">
             <h2 className="text-xl font-semibold">Theory</h2>
             <p className="mt-2 leading-relaxed text-slate-700 dark:text-slate-300">{method.theory}</p>
-          </article>
+          </motion.article>
 
-          <article className="rounded-2xl border border-slate-300/40 bg-white/60 p-6 dark:border-slate-200/10 dark:bg-slate-900/40">
+          <motion.article variants={revealItem} className="rounded-2xl border border-slate-300/40 bg-white/60 p-6 dark:border-slate-200/10 dark:bg-slate-900/40">
             <h2 className="text-xl font-semibold">Code</h2>
             <pre className="mt-3 overflow-x-auto rounded-lg bg-ink p-4 text-sm text-slate-100">
               <code>{method.code}</code>
             </pre>
-          </article>
+          </motion.article>
 
-          <article>
+          <motion.article variants={revealItem}>
             <h2 className="mb-3 text-xl font-semibold">Graph</h2>
             <Graph method={method} />
-          </article>
+          </motion.article>
 
-          <article className="rounded-2xl border border-slate-300/40 bg-white/60 p-6 dark:border-slate-200/10 dark:bg-slate-900/40">
+          <motion.article variants={revealItem} className="rounded-2xl border border-slate-300/40 bg-white/60 p-6 dark:border-slate-200/10 dark:bg-slate-900/40">
             <h2 className="text-xl font-semibold">Example</h2>
             <p className="mt-2 leading-relaxed text-slate-700 dark:text-slate-300">{method.example}</p>
             <div className="mt-4">
               <InteractiveExample method={method} />
             </div>
-          </article>
+          </motion.article>
         </section>
-      </div>
+      </motion.div>
     </>
   );
 }

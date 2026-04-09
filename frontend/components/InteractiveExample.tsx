@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { MethodContent } from "@/types/method";
 
 interface Props {
@@ -61,19 +62,41 @@ export default function InteractiveExample({ method }: Props) {
   }, [metrics.fidelity]);
 
   return (
-    <section className="rounded-2xl border border-slate-300/40 bg-white/60 p-6 shadow-halo backdrop-blur dark:border-slate-200/10 dark:bg-slate-900/40">
+    <motion.section
+      initial={{ opacity: 0, y: 14 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="rounded-2xl border border-slate-300/40 bg-white/60 p-6 shadow-halo backdrop-blur dark:border-slate-200/10 dark:bg-slate-900/40"
+    >
       <h3 className="text-lg font-semibold">{exampleLab.title}</h3>
       <p className="mt-2 text-sm leading-relaxed text-slate-700 dark:text-slate-300">{exampleLab.description}</p>
 
       <div className="mt-5 grid gap-4 md:grid-cols-2">
-        {exampleLab.controls.map((control) => (
-          <label key={control.key} className="rounded-xl border border-slate-300/30 bg-white/70 p-3 dark:border-slate-200/10 dark:bg-slate-950/30">
+        {exampleLab.controls.map((control, index) => (
+          <motion.label
+            key={control.key}
+            initial={{ opacity: 0, y: 8 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.25, delay: index * 0.06 }}
+            whileHover={{ y: -2 }}
+            className="rounded-xl border border-slate-300/30 bg-white/70 p-3 dark:border-slate-200/10 dark:bg-slate-950/30"
+          >
             <div className="flex items-center justify-between text-sm font-medium">
               <span>{control.label}</span>
-              <span>
-                {formatNumber(values[control.key] ?? control.defaultValue)}
-                {control.unit ? ` ${control.unit}` : ""}
-              </span>
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.span
+                  key={`${control.key}-${values[control.key] ?? control.defaultValue}`}
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 4 }}
+                  transition={{ duration: 0.16 }}
+                >
+                  {formatNumber(values[control.key] ?? control.defaultValue)}
+                  {control.unit ? ` ${control.unit}` : ""}
+                </motion.span>
+              </AnimatePresence>
             </div>
             <input
               type="range"
@@ -87,7 +110,7 @@ export default function InteractiveExample({ method }: Props) {
               }}
               className="mt-2 w-full"
             />
-          </label>
+          </motion.label>
         ))}
       </div>
 
@@ -95,18 +118,62 @@ export default function InteractiveExample({ method }: Props) {
         <div className="grid gap-2 sm:grid-cols-3">
           <p className="text-sm">
             Fidelity
-            <span className="mt-1 block text-xl font-semibold">{formatNumber(metrics.fidelity, 3)}</span>
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.span
+                key={`fidelity-${metrics.fidelity.toFixed(3)}`}
+                className="mt-1 block text-xl font-semibold"
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 4 }}
+                transition={{ duration: 0.14 }}
+              >
+                {formatNumber(metrics.fidelity, 3)}
+              </motion.span>
+            </AnimatePresence>
           </p>
           <p className="text-sm">
             Episodes
-            <span className="mt-1 block text-xl font-semibold">{metrics.iterations}</span>
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.span
+                key={`episodes-${metrics.iterations}`}
+                className="mt-1 block text-xl font-semibold"
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 4 }}
+                transition={{ duration: 0.14 }}
+              >
+                {metrics.iterations}
+              </motion.span>
+            </AnimatePresence>
           </p>
           <p className="text-sm">
             Energy Cost
-            <span className="mt-1 block text-xl font-semibold">{formatNumber(metrics.energy, 3)}</span>
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.span
+                key={`energy-${metrics.energy.toFixed(3)}`}
+                className="mt-1 block text-xl font-semibold"
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 4 }}
+                transition={{ duration: 0.14 }}
+              >
+                {formatNumber(metrics.energy, 3)}
+              </motion.span>
+            </AnimatePresence>
           </p>
         </div>
-        <p className="mt-3 text-sm text-slate-200">{explanation}</p>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.p
+            key={explanation}
+            className="mt-3 text-sm text-slate-200"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+          >
+            {explanation}
+          </motion.p>
+        </AnimatePresence>
       </div>
 
       <div className="mt-5 rounded-xl border border-slate-300/30 bg-white/70 p-4 dark:border-slate-200/10 dark:bg-slate-950/30">
@@ -127,6 +194,6 @@ export default function InteractiveExample({ method }: Props) {
           Estimated runtime for this scenario: {Math.round((metrics.iterations * sampleSize) / 20)} ms
         </p>
       </div>
-    </section>
+    </motion.section>
   );
 }
