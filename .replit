@@ -1,0 +1,16 @@
+run = "cd frontend && npm run build && cd .. && python backend/app.py"
+
+[env]
+PYTHONUNBUFFERED = "true"
+
+[nix]
+channel = "stable-23_11"
+
+[[nix.packages]]
+package = "python310"
+
+[[nix.packages]]
+package = "nodejs_20"
+
+[[nix.packages]]
+package = "npm"

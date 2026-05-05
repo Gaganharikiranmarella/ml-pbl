@@ -1,10 +1,12 @@
 import json
 import os
 from http.server import HTTPServer, BaseHTTPRequestHandler
+from urllib.parse import urlparse
 
 
 class RequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
+        # API endpoints
         if self.path == "/":
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
@@ -17,7 +19,15 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.end_headers()
             response = {"status": "ok"}
             self.wfile.write(json.dumps(response).encode())
+        elif self.path.startswith("/api/"):
+            # API routes
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            response = {"message": "API endpoint"}
+            self.wfile.write(json.dumps(response).encode())
         else:
+            # Default 404 for API calls
             self.send_response(404)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
@@ -30,7 +40,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
 def run_server(port=8000):
     server = HTTPServer(("0.0.0.0", port), RequestHandler)
-    print(f"Server running on port {port}")
+    print(f"Backend server running on port {port}")
     server.serve_forever()
 
 
